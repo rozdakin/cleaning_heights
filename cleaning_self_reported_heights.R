@@ -43,9 +43,24 @@ reported_heights[1:150,] %>%
   mutate(height = str_replace(height, '  ', ' ')) %>% # let's get spaces as separators
   pull(height) %>% 
   str_split_fixed(., pattern = ' ', n = Inf) %>% # then carve at the spaces
-  data.frame() 
+  data.frame() %>% 
+  mutate(part_1_num = as.numeric(str_remove_all(X1, pattern = '[^0-9.]'))) %>% 
+  mutate(part_2_num = as.numeric(str_remove_all(X2, pattern = '[^0-9.]'))) %>% 
+  rename('part_1' = X1, 'part_2' = X2) %>% 
+  mutate(height_inches = case_when(
+    part_1_num > 48 & part_1_num < 84 ~ part_1_num,
+    part_1_num > 120 & part_1_num < 210 ~ part_1_num / 2.54,
+    part_1_num > 4 & part_1_num < 7 ~ part_1_num * 12,
+    part_1_num <= 2 ~ part_1_num * 100 / 2.54, # let's assume a v. small number is m
+    TRUE ~ NA
+  )) %>% 
+  mutate(height_inches = ifelse(part_2 != '' & part_2_num <= 12, height_inches + part_2_num, height_inches)) %>% 
+  mutate(orig = reported_heights[1:150, 'height'])
   
-
+# inspect the output to see if it makese sense
+# let's list some cases that need to be handled still:
+# row 40 is feet.inches (pretty common format I think)
+# row 66 is oddball/uncommon might actually be 5'11"
 
 
 

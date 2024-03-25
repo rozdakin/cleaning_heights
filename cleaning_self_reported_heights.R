@@ -50,14 +50,14 @@ output_df <- reported_heights[1:n_samp,] %>%
   mutate(part_2_num = as.numeric(str_remove_all(X2, pattern = '[^0-9.]'))) %>% 
   rename('part_1' = X1, 'part_2' = X2) %>% 
   mutate(height_inches = case_when(
-    part_1_num > 48 & part_1_num < 84 ~ part_1_num,
-    part_1_num > 120 & part_1_num < 210 ~ part_1_num / 2.54,
-    part_1_num > 4 & part_1_num < 7 ~ part_1_num * 12,
-    part_1_num >= 1.2 & part_1_num <= 2 ~ part_1_num * 100 / 2.54, # let's assume a v. small number is m
+    part_1_num > 48 & part_1_num <= 84 ~ part_1_num,
+    part_1_num > 120 & part_1_num <= 215 ~ part_1_num / 2.54,
+    part_1_num > 4 & part_1_num <= 7 ~ part_1_num * 12,
+    part_1_num > 1.2 & part_1_num <= 2 ~ part_1_num * 100 / 2.54, # let's assume a v. small number is m
     TRUE ~ NA
   )) %>% 
   mutate(height_inches = ifelse(part_2 != '' & part_2_num <= 12, height_inches + part_2_num, height_inches)) %>% 
-  mutate(decimal_as_inches = part_1_num > 4 & part_1_num < 7 & (as.character((part_1_num - floor(part_1_num))) %in% as.character(seq(0.1, 0.9, by = 0.1)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
+  mutate(decimal_as_inches = part_1_num > 4 & part_1_num <= 7 & (as.character((part_1_num - floor(part_1_num))) %in% as.character(seq(0.1, 0.9, by = 0.1)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
   # this is clunky due to floating point
   mutate(height_inches = ifelse(decimal_as_inches == T, floor(part_1_num) * 12 + 10 * (part_1_num %% floor(part_1_num)), height_inches)) %>% # extra step for the decimal_as_inches format
   mutate(orig = reported_heights[1:n_samp, 'height']) %>% 
@@ -80,10 +80,9 @@ myplot
 ggsave(filename = 'cleaned_heights.pdf', plot = myplot, width = 6, height = 4, units = 'in')
 # some extreme values... let's continue...
 
-output_df %>% filter(height_inches < 50)
-reported_heights %>% filter(height == '0.7') # I have to assume an error
-
 output_df %>% as_tibble() %>% select(height_inches, orig) %>% print(n = Inf) # scan for other cases
+output_df %>% as_tibble %>% select(height_inches, orig) %>% 
+  slice(c(363,376))
 
 # row 66 is oddball/uncommon might actually be 5'11"
 # row 187 oddball '5 feet and 8.11 inches' not handled
@@ -98,6 +97,6 @@ output_df %>% as_tibble() %>% select(height_inches, orig) %>% print(n = Inf) # s
 # rows 332, 492, '5.11' should be 71, not 61.3
 # row 372 '6.1' should be 73, not 73.2
 # row 363 that person might be 7 foot and that could be real... let's change to >= to be a just bit more permissive for the extreme heights
-# similarly, row 376 214 might be real for cm height (just over 7 feet)
+# similarly, row 376, 214 might be real for cm height (just over 7 feet)
 # row 448 "2'33" is nonsense/shouldn't be handled (should be NA I think)
 

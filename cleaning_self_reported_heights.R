@@ -38,7 +38,7 @@ reported_heights$height[1:150]
   # 6b. numbers with , separator that can be converted to feet and inches
 # ...
 
-n_samp <- 500
+n_samp <- nrow(reported_heights)
 
 output_df <- reported_heights[1:n_samp,] %>% 
   mutate(height = str_replace(height, '\'', '\' ')) %>% 
@@ -76,10 +76,15 @@ myplot <- output_df %>%
   ggplot() + theme_bw() +
   geom_jitter(aes(x = height_inches, y = gender, color = gender), width = 0, height = 0.4) +
   labs(x = 'Height (inches)', y = '') +
-  ggtitle(mytitle)
+  ggtitle(mytitle) +
+  geom_vline(xintercept = c(54, 84), linetype = 'dotted')
 myplot
 ggsave(filename = 'cleaned_heights.pdf', plot = myplot, width = 6, height = 4, units = 'in')
 # some extreme values... let's continue...
+
+# a few more errors to clean up (below)
+# one thing we can see is that we have some really extreme values below 4.5 feet and at 7 feet
+# to decide how to handle those, we can look into how probable it is to have this many values at that extreme in a sample this size
 
 output_df %>% as_tibble() %>% select(height_inches, orig) %>% print(n = Inf) # scan for other cases
 output_df %>% as_tibble %>% select(height_inches, orig) %>% 

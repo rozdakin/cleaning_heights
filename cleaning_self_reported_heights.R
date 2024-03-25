@@ -40,7 +40,7 @@ reported_heights$height[1:150]
 
 n_samp <- 500
 
-reported_heights[1:n_samp,] %>% 
+output_df <- reported_heights[1:n_samp,] %>% 
   mutate(height = str_replace(height, '\'', '\' ')) %>% 
   mutate(height = str_replace(height, '  ', ' ')) %>% # let's get spaces as separators
   pull(height) %>% 
@@ -53,7 +53,7 @@ reported_heights[1:n_samp,] %>%
     part_1_num > 48 & part_1_num < 84 ~ part_1_num,
     part_1_num > 120 & part_1_num < 210 ~ part_1_num / 2.54,
     part_1_num > 4 & part_1_num < 7 ~ part_1_num * 12,
-    part_1_num <= 2 ~ part_1_num * 100 / 2.54, # let's assume a v. small number is m
+    part_1_num >= 1.2 & part_1_num <= 2 ~ part_1_num * 100 / 2.54, # let's assume a v. small number is m
     TRUE ~ NA
   )) %>% 
   mutate(height_inches = ifelse(part_2 != '' & part_2_num <= 12, height_inches + part_2_num, height_inches)) %>% 
@@ -77,6 +77,11 @@ myplot <- output_df %>%
   geom_jitter(aes(x = height_inches, y = gender, color = gender), width = 0, height = 0.4) +
   labs(x = 'Height (inches)', y = '') +
   ggtitle(mytitle)
+myplot
 ggsave(filename = 'cleaned_heights.pdf', plot = myplot, width = 6, height = 4, units = 'in')
 # some extreme values... let's continue...
+
+output_df %>% filter(height_inches < 50)
+reported_heights %>% filter(height == '0.7') # I have to assume an error
+
 

@@ -38,7 +38,9 @@ reported_heights$height[1:150]
   # 6b. numbers with , separator that can be converted to feet and inches
 # ...
 
-output_df <- reported_heights[1:150,] %>% 
+n_samp <- 500
+
+reported_heights[1:n_samp,] %>% 
   mutate(height = str_replace(height, '\'', '\' ')) %>% 
   mutate(height = str_replace(height, '  ', ' ')) %>% # let's get spaces as separators
   pull(height) %>% 
@@ -58,8 +60,8 @@ output_df <- reported_heights[1:150,] %>%
   mutate(decimal_as_inches = part_1_num > 4 & part_1_num < 7 & (as.character((part_1_num - floor(part_1_num))) %in% as.character(seq(0.1, 0.9, by = 0.1)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
   # this is clunky due to floating point
   mutate(height_inches = ifelse(decimal_as_inches == T, floor(part_1_num) * 12 + 10 * (part_1_num %% floor(part_1_num)), height_inches)) %>% # extra step for the decimal_as_inches format
-  mutate(orig = reported_heights[1:150, 'height']) %>% 
-  mutate(gender = reported_heights[1:150, 'sex']) %>% 
+  mutate(orig = reported_heights[1:n_samp, 'height']) %>% 
+  mutate(gender = reported_heights[1:n_samp, 'sex']) %>% 
   select(gender, orig, height_inches)
   
 # inspect the output to see if it makese sense

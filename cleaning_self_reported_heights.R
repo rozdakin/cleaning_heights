@@ -58,7 +58,7 @@ output_df <- reported_heights[1:n_samp,] %>%
     TRUE ~ NA
   )) %>% 
   mutate(height_inches = ifelse(part_2 != '' & part_2_num <= 12, height_inches + part_2_num, height_inches)) %>% 
-  mutate(decimal_as_inches = part_1_num > 4 & part_1_num <= 7 & (as.character((part_1_num - floor(part_1_num))) %in% as.character(seq(0.1, 0.9, by = 0.1)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
+  mutate(decimal_as_inches = part_1_num > 4 & part_1_num <= 7 & (as.character(round((part_1_num - floor(part_1_num)), digits = 2)) %in% as.character(round(seq(0.1, 0.9, by = 0.1), digits = 2)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
   # this is clunky due to floating point
   mutate(height_inches = ifelse(decimal_as_inches == T, floor(part_1_num) * 12 + 10 * (part_1_num %% floor(part_1_num)), height_inches)) %>% # extra step for the decimal_as_inches format
   mutate(orig = reported_heights[1:n_samp, 'height']) %>% 
@@ -83,26 +83,31 @@ ggsave(filename = 'cleaned_heights.pdf', plot = myplot, width = 6, height = 4, u
 
 output_df %>% as_tibble() %>% select(height_inches, orig) %>% print(n = Inf) # scan for other cases
 output_df %>% as_tibble %>% select(height_inches, orig) %>% 
-  slice(c(448))
-
-# row 66 is oddball/uncommon might actually be 5'11"
-# row 187 oddball '5 feet and 8.11 inches' not handled
-# row 311 is oddball (in words)
+  slice(c(320, 332, 372))
 
 # row 194 5.25 might *actually* be 5 and 1/4 feet 
 # row 231, 242, 292 similarly values like 5.5 may not be 5'5", but rather 5'6"
 
 # we assume people don't give their fractional height in feet if the fraction is something harder to intuit, like 10ths or 5ths. but they might give their fractional height in feet if it's x.25, x.5, x.75...
 
-# row 320 '5.1' should be 61, why is it 61.2 ??
-# rows 332, 492, '5.11' should be 71, not 61.3
+# rows 332, 492, '5.11' should be 71, not 61.3 NOT DONE YET
+
+# row 320 '5.1' should be 61, why is it 61.2 ?? 
+# ok, it's a floating point thing, so that may be a poor way to handle. DONE NOW
 # row 372 '6.1' should be 73, not 73.2
 
-# row 448 "2'33" is nonsense/shouldn't be handled (should be NA I think) this is a weird one because they might actually be 2 feet + 33 inches which is possible, but still odd and probably shouldn't be handled DONE
+# row 66 is oddball/uncommon might actually be 5'11"
+# row 187 oddball '5 feet and 8.11 inches' not handled
+# row 311 is oddball (in words)... these are safely handled as NAs for now, which is good
+
+# row 448 "2'33" is nonsense/shouldn't be handled (should be NA I think) this is a weird one because they might actually be 2 feet + 33 inches which is possible, but still odd and probably shouldn't be handled DONE NOW
 
 # row 363 that person might be 7 foot and that could be real... let's change to >= to be a just bit more permissive for the extreme heights DONE
-# similarly, row 376, 214 might be real for cm height (just over 7 feet) DONE
+# similarly, row 376, 214 might be real for cm height (just over 7 feet) DONE NOW
 
 # row 288 '6,8' is not 68, but rather I think it's 6'8" DONE NOW
 # and also row 357 '5,4' should be 64 not 54
 # and also row 466 '5,8' should be 68 not 58
+
+
+

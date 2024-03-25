@@ -38,7 +38,13 @@ reported_heights$height[1:150]
   # 6b. numbers with , separator that can be converted to feet and inches
 # ...
 
-reported_heights[1:150,]
+reported_heights[1:150,] %>% 
+  mutate(height = str_replace(height, '\'', '\' ')) %>% 
+  mutate(height = str_replace(height, '  ', ' ')) %>% # let's get spaces as separators
+  pull(height) %>% 
+  str_split_fixed(., pattern = ' ', n = Inf) %>% # then carve at the spaces
+  data.frame() 
+  
 
 
 

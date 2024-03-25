@@ -38,7 +38,7 @@ reported_heights$height[1:150]
   # 6b. numbers with , separator that can be converted to feet and inches
 # ...
 
-reported_heights[1:150,] %>% 
+output_df <- reported_heights[1:150,] %>% 
   mutate(height = str_replace(height, '\'', '\' ')) %>% 
   mutate(height = str_replace(height, '  ', ' ')) %>% # let's get spaces as separators
   pull(height) %>% 
@@ -58,14 +58,23 @@ reported_heights[1:150,] %>%
   mutate(decimal_as_inches = part_1_num > 4 & part_1_num < 7 & (as.character((part_1_num - floor(part_1_num))) %in% as.character(seq(0.1, 0.9, by = 0.1)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
   # this is clunky due to floating point
   mutate(height_inches = ifelse(decimal_as_inches == T, floor(part_1_num) * 12 + 10 * (part_1_num %% floor(part_1_num)), height_inches)) %>% # extra step for the decimal_as_inches format
-  mutate(orig = reported_heights[1:150, 'height'])
+  mutate(orig = reported_heights[1:150, 'height']) %>% 
+  mutate(gender = reported_heights[1:150, 'sex']) %>% 
+  select(gender, orig, height_inches)
   
 # inspect the output to see if it makese sense
 # let's list some cases that need to be handled still:
-# row 40 is feet.inches (pretty common format I think)
+# row 40 is feet.inches (pretty common format I think)... DONE
 # row 66 is oddball/uncommon might actually be 5'11"
 
+# let's take a look at the distribution for the first 150 after cleaning, then expand up to more rows...
 
-
-
+(mytitle <- str_c('initial n = ', nrow(output_df), sep = ''))
+myplot <- output_df %>% 
+  ggplot() + theme_bw() +
+  geom_jitter(aes(x = height_inches, y = gender, color = gender), width = 0, height = 0.4) +
+  labs(x = 'Height (inches)', y = '') +
+  ggtitle(mytitle)
+ggsave(filename = 'cleaned_heights.pdf', plot = myplot, width = 6, height = 4, units = 'in')
+# some extreme values... let's continue...
 

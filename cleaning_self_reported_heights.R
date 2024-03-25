@@ -55,6 +55,9 @@ reported_heights[1:150,] %>%
     TRUE ~ NA
   )) %>% 
   mutate(height_inches = ifelse(part_2 != '' & part_2_num <= 12, height_inches + part_2_num, height_inches)) %>% 
+  mutate(decimal_as_inches = part_1_num > 4 & part_1_num < 7 & (as.character((part_1_num - floor(part_1_num))) %in% as.character(seq(0.1, 0.9, by = 0.1)))) %>% # note the ambiguity, is 5.3s a 5'3"? I will assume as much.
+  # this is clunky due to floating point
+  mutate(height_inches = ifelse(decimal_as_inches == T, floor(part_1_num) * 12 + 10 * (part_1_num %% floor(part_1_num)), height_inches)) %>% # extra step for the decimal_as_inches format
   mutate(orig = reported_heights[1:150, 'height'])
   
 # inspect the output to see if it makese sense

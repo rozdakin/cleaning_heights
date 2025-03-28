@@ -114,5 +114,6 @@ output_df %>% as_tibble %>% select(height_inches, orig) %>%
 # and also row 357 '5,4' should be 64 not 54
 # and also row 466 '5,8' should be 68 not 58
 
+# to be continued...
 
 
